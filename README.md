@@ -13,5 +13,5 @@ brew install is-it-slop
 
 The formula in this repo is automatically generated and updated by CI in the main
 [is-it-slop](https://github.com/SamBroomy/is-it-slop) repository (see
-[homebrew.yml](https://github.com/SamBroomy/is-it-slop/blob/main/.github/workflows/homebrew.yml)).
+[homebrew.yaml](https://github.com/SamBroomy/is-it-slop/blob/main/.github/workflows/homebrew.yaml)).
 Do not edit manually.
