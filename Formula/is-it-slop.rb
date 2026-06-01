@@ -2,23 +2,23 @@ class IsItSlop < Formula
   desc "Detect AI-generated text"
   homepage "https://github.com/SamBroomy/is-it-slop"
   license "MIT"
-  version "0.6.0-beta.1"
+  version "0.6.0"
 
   on_macos do
     on_arm do
-      url "https://github.com/SamBroomy/is-it-slop/releases/download/v0.6.0-beta.1/is-it-slop-aarch64-apple-darwin.tar.gz"
-      sha256 "3f88a0d017d598f05001c00254090c0b06f3b4bd02f8d940a5b9949727f6a47c"
+      url "https://github.com/SamBroomy/is-it-slop/releases/download/v0.6.0/is-it-slop-aarch64-apple-darwin.tar.gz"
+      sha256 "fb81d7ddee3b731b389a2adcf9fb3edb0d763aba5a3c46fa9c57878800c7ad09"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/SamBroomy/is-it-slop/releases/download/v0.6.0-beta.1/is-it-slop-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "83fa39583adc977de66017112d5f8c0dc43caa051f9923f123774bc0283b4de9"
+      url "https://github.com/SamBroomy/is-it-slop/releases/download/v0.6.0/is-it-slop-aarch64-unknown-linux-gnu.tar.gz"
+      sha256 "ecc600dfae6ff78d5ebcb097fbfd16467377aecc3a15308cda464b67d054c494"
     end
     on_intel do
-      url "https://github.com/SamBroomy/is-it-slop/releases/download/v0.6.0-beta.1/is-it-slop-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "14bb01b475d861140beeacc9286645f8874c3507af49d8551301e43c932bab1e"
+      url "https://github.com/SamBroomy/is-it-slop/releases/download/v0.6.0/is-it-slop-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "f0d45f01fa1311fcb21ba455743eb32bb244af0ee6df7151f3c52c09e1fa1f53"
     end
   end
 
