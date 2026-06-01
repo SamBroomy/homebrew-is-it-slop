@@ -1,0 +1,78 @@
+name: Publish Homebrew Formula
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-homebrew-tap:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out source repository
+        uses: actions/checkout@v4
+
+      - name: Check out tap repository
+        uses: actions/checkout@v4
+        with:
+          repository: SamBroomy/homebrew-is-it-slop
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: tap
+
+      - name: Generate Homebrew formula
+        env:
+          VERSION: ${{ github.event.release.tag_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          VERSION="${VERSION#v}"
+          BASE_URL="https://github.com/${REPO}/releases/download/${{ github.event.release.tag_name }}"
+          assets=(
+            "is-it-slop-aarch64-apple-darwin.tar.gz"
+            "is-it-slop-aarch64-unknown-linux-gnu.tar.gz"
+            "is-it-slop-x86_64-unknown-linux-gnu.tar.gz"
+          )
+          MACOS_ARM64_ASSET="${assets[0]}"
+          LINUX_ARM64_ASSET="${assets[1]}"
+          LINUX_X86_64_ASSET="${assets[2]}"
+          TMP_DIR="$(mktemp -d)"
+          trap 'rm -rf "${TMP_DIR}"' EXIT
+
+          curl -fsSL "${BASE_URL}/${MACOS_ARM64_ASSET}" -o "${TMP_DIR}/${MACOS_ARM64_ASSET}"
+          curl -fsSL "${BASE_URL}/${LINUX_ARM64_ASSET}" -o "${TMP_DIR}/${LINUX_ARM64_ASSET}"
+          curl -fsSL "${BASE_URL}/${LINUX_X86_64_ASSET}" -o "${TMP_DIR}/${LINUX_X86_64_ASSET}"
+          for asset in "${assets[@]}"; do
+            test -s "${TMP_DIR}/${asset}" || { echo "Missing or empty release asset: ${asset}" >&2; exit 1; }
+          done
+
+          MACOS_ARM64_SHA256="$(sha256sum "${TMP_DIR}/${MACOS_ARM64_ASSET}" | awk '{print $1}')"
+          LINUX_ARM64_SHA256="$(sha256sum "${TMP_DIR}/${LINUX_ARM64_ASSET}" | awk '{print $1}')"
+          LINUX_X86_64_SHA256="$(sha256sum "${TMP_DIR}/${LINUX_X86_64_ASSET}" | awk '{print $1}')"
+
+          sed \
+            -e "s|__VERSION__|${VERSION}|g" \
+            -e "s|__MACOS_ARM64_URL__|${BASE_URL}/${MACOS_ARM64_ASSET}|g" \
+            -e "s|__MACOS_ARM64_SHA256__|${MACOS_ARM64_SHA256}|g" \
+            -e "s|__LINUX_ARM64_URL__|${BASE_URL}/${LINUX_ARM64_ASSET}|g" \
+            -e "s|__LINUX_ARM64_SHA256__|${LINUX_ARM64_SHA256}|g" \
+            -e "s|__LINUX_X86_64_URL__|${BASE_URL}/${LINUX_X86_64_ASSET}|g" \
+            -e "s|__LINUX_X86_64_SHA256__|${LINUX_X86_64_SHA256}|g" \
+            homebrew/is-it-slop.rb > tap/is-it-slop.rb
+
+      - name: Commit and push formula update
+        env:
+          TAP_BRANCH: ${{ vars.HOMEBREW_TAP_BRANCH || 'main' }}
+        run: |
+          set -euo pipefail
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add is-it-slop.rb
+          if git diff --cached --quiet; then
+            echo "No formula changes detected."
+            exit 0
+          fi
+          git commit -m "Update is-it-slop formula for ${{ github.event.release.tag_name }}"
+          git push origin HEAD:${TAP_BRANCH}
