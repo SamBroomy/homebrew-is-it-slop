@@ -1,0 +1,1 @@
+# homebrew-is-it-slop
